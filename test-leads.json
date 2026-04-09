@@ -1,0 +1,92 @@
+[
+  {
+    "name": "Thomas Müller",
+    "email": "t.mueller@autohaus-mueller.de",
+    "phone": "+49 171 1234567",
+    "service": "KI-Automatisierung",
+    "message": "Wir sind ein Autohaus mit 45 Mitarbeitern. Unsere Werkstattplanung läuft noch komplett manuell über Excel. Können Sie uns helfen, das zu automatisieren? Budget ist vorhanden.",
+    "source": "Website Kontaktformular",
+    "expected_score": "hot"
+  },
+  {
+    "name": "Sarah Weber",
+    "email": "s.weber@weber-steuerberatung.de",
+    "phone": "+49 89 9876543",
+    "service": "Dokumentenverarbeitung",
+    "message": "Wir verarbeiten ca. 200 Rechnungen pro Woche manuell. Das kostet uns mindestens eine Vollzeitstelle. Gibt es KI-Lösungen dafür?",
+    "source": "Google Ads",
+    "expected_score": "hot"
+  },
+  {
+    "name": "Michael Schmidt",
+    "email": "info@schmidt-handwerk.de",
+    "phone": "+49 152 3456789",
+    "service": "Allgemein",
+    "message": "Habe gehört dass KI viel Zeit sparen kann. Was bieten Sie an?",
+    "source": "LinkedIn",
+    "expected_score": "warm"
+  },
+  {
+    "name": "Lisa Braun",
+    "email": "l.braun@praxis-braun.de",
+    "phone": "+49 176 5678901",
+    "service": "KI-Telefonie",
+    "message": "Unsere Arztpraxis hat 3 Standorte. Die Telefonzentrale ist ständig überlastet, Patienten beschweren sich dass niemand rangeht. Brauchen dringend eine Lösung!",
+    "source": "Empfehlung",
+    "expected_score": "hot"
+  },
+  {
+    "name": "Jan Krüger",
+    "email": "jan@krueger-consulting.de",
+    "phone": "",
+    "service": "Workshop",
+    "message": "Würde gerne einen KI-Workshop für mein 8-köpfiges Team buchen. Haben Sie sowas im Angebot?",
+    "source": "YouTube",
+    "expected_score": "warm"
+  },
+  {
+    "name": "Anna Hoffmann",
+    "email": "a.hoffmann@student.uni-muenchen.de",
+    "phone": "",
+    "service": "Allgemein",
+    "message": "Hallo, ich schreibe meine Bachelorarbeit über KI im Mittelstand. Kann ich ein Interview führen?",
+    "source": "Website",
+    "expected_score": "cold"
+  },
+  {
+    "name": "Robert Fischer",
+    "email": "r.fischer@fischer-logistik.de",
+    "phone": "+49 160 7890123",
+    "service": "Prozessoptimierung",
+    "message": "Wir haben 120 LKWs und die Routenplanung ist ein Chaos. Jede Woche verlieren wir tausende Euro durch ineffiziente Touren. Brauchen KI-gestützte Optimierung, Budget bis 50k ist freigegeben.",
+    "source": "Google Ads",
+    "expected_score": "hot"
+  },
+  {
+    "name": "Petra Schneider",
+    "email": "petra@web.de",
+    "phone": "+49 177 1111111",
+    "service": "Chatbot",
+    "message": "bräuchte chatbot für meinen onlineshop was kostet das",
+    "source": "Instagram",
+    "expected_score": "warm"
+  },
+  {
+    "name": "David Kim",
+    "email": "d.kim@techcorp-asia.com",
+    "phone": "+65 9123 4567",
+    "service": "AI Strategy",
+    "message": "We are a Singapore-based tech company expanding to DACH. Looking for local AI consulting partner for our German operations. Enterprise budget.",
+    "source": "LinkedIn",
+    "expected_score": "hot"
+  },
+  {
+    "name": "Marketing Bot",
+    "email": "noreply@spam-leads.xyz",
+    "phone": "",
+    "service": "",
+    "message": "Buy cheap SEO services! Best prices guaranteed! Click here: bit.ly/spam123",
+    "source": "Website",
+    "expected_score": "spam"
+  }
+]
