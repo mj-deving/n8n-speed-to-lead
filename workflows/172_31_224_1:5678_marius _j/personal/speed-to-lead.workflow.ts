@@ -179,7 +179,7 @@ return {
         type: 'n8n-nodes-base.googleSheets',
         version: 4.7,
         position: [900, 200],
-        credentials: { googleSheetsOAuth2Api: { id: 'TODO', name: 'Google Sheets' } },
+        credentials: { googleSheetsOAuth2Api: { id: 'BU7jKOxVkaiRJphj', name: 'Google Sheets' } },
     })
     LogToGoogleSheets = {
         resource: 'sheet',
@@ -222,7 +222,7 @@ return {
         type: 'n8n-nodes-base.gmail',
         version: 2.2,
         position: [1200, 300],
-        credentials: { gmailOAuth2: { id: 'TODO', name: 'Gmail' } },
+        credentials: { gmailOAuth2: { id: 'QZcdvolqgtbfPfBE', name: 'Gmail' } },
     })
     SendResponseEmail = {
         resource: 'message',
@@ -240,9 +240,10 @@ return {
         type: 'n8n-nodes-base.slack',
         version: 2.4,
         position: [1500, 200],
-        credentials: { slackOAuth2Api: { id: 'TODO', name: 'Slack' } },
+        credentials: { slackApi: { id: 'eAfCfOcljgXJsdU2', name: 'Slack Bot' } },
     })
     NotifyTeam = {
+        authentication: 'accessToken',
         resource: 'message',
         operation: 'post',
         select: 'channel',
