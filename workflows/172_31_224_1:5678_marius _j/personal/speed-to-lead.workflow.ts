@@ -39,7 +39,7 @@ import { workflow, node, links } from '@n8n-as-code/transformer';
 @workflow({
     id: 'TIVWeyLp1e0FMdeC',
     name: 'Speed to Lead Autopilot',
-    active: false,
+    active: true,
     settings: { executionOrder: 'v1', callerPolicy: 'workflowsFromSameOwner', availableInMCP: false },
 })
 export class SpeedToLeadAutopilotWorkflow {
@@ -131,6 +131,7 @@ Analysiere die eingehende Anfrage und bewerte:
         schemaType: 'manual',
         inputSchema:
             '{ "type": "object", "properties": { "score": { "type": "string", "enum": ["hot", "warm", "cold", "spam"], "description": "Lead qualification score" }, "summary": { "type": "string", "description": "1-2 sentence summary of what the lead wants" }, "recommended_action": { "type": "string", "description": "Recommended next action for the sales team" }, "personalized_response": { "type": "string", "description": "3-5 sentence personalized response to send to the lead" } }, "required": ["score", "summary", "recommended_action", "personalized_response"] }',
+        autoFix: true,
     };
 
     @node({
