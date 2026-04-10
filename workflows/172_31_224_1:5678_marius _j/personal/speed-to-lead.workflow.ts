@@ -186,13 +186,13 @@ return {
         operation: 'append',
         documentId: {
             __rl: true,
-            mode: 'list',
-            value: '',
+            mode: 'id',
+            value: '1mlozyJyFtkyAaqwopZZkDjIGnMWD91RJmaiVcy8WCJE',
         },
         sheetName: {
             __rl: true,
-            mode: 'list',
-            value: '',
+            mode: 'id',
+            value: '631326764',
         },
         dataMode: 'autoMapInputData',
         columns: {
@@ -249,8 +249,8 @@ return {
         select: 'channel',
         channelId: {
             __rl: true,
-            mode: 'list',
-            value: '',
+            mode: 'id',
+            value: 'C0ASXU219GQ',
         },
         messageType: 'text',
         text: '={{ "🔥 *Neuer HOT Lead!*\\n\\n*Name:* " + $json.Name + "\\n*Email:* " + $json.Email + "\\n*Score:* " + $json.Score + "\\n*Service:* " + $json.Service + "\\n\\n*Zusammenfassung:* " + $json.AI_Summary + "\\n*Empfohlene Aktion:* " + $json.Recommended_Action + "\\n\\n📊 Google Sheet: [Link zum CRM einfügen]" }}',
