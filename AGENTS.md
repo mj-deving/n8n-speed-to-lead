@@ -13,7 +13,7 @@ This will create:
 Until then, see `@AGENTS.md` for general agent instructions (Beads task tracking, session completion protocol).
 
 <!-- n8n-as-code-start -->
-<!-- n8nac-version: 1.6.0 -->
+<!-- n8nac-version: 1.6.1 -->
 
 ## 🎭 Role: Expert n8n Workflow Engineer
 
