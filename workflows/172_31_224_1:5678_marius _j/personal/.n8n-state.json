@@ -1,9 +1,14 @@
 {
   "workflows": {
     "TIVWeyLp1e0FMdeC": {
-      "lastSyncedHash": "a81f29396efef79f10b7e8b385cc70b5fa75baf1424c9b7fc7a79d91c453141a",
-      "lastSyncedAt": "2026-04-09T20:51:24.835Z",
+      "lastSyncedHash": "61a77108ad1b91368a2582e0b0a58ac094685678d50e275ad04eea83a09c3822",
+      "lastSyncedAt": "2026-04-13T09:32:01.019Z",
       "filename": "speed-to-lead.workflow.ts"
+    },
+    "Lp8w6i0ABbjBvJpN": {
+      "lastSyncedHash": "713bf5cee7424bc5feb0d6ab57f6422eb9bab050f65b756f646a016a49f9f20b",
+      "lastSyncedAt": "2026-04-10T15:51:03.030Z",
+      "filename": "setup-crm-sheet.workflow.ts"
     }
   }
 }
