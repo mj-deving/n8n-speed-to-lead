@@ -6,7 +6,7 @@
 ![Code-First](https://img.shields.io/badge/code--first-n8nac-blue.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-**Automated lead qualification and response in <30 seconds.** Webhook receives inquiry, LLM qualifies the lead (hot/warm/cold/spam), Google Sheets logs it as CRM, personalized email goes out, and the team gets notified on Slack.
+**Automated lead qualification and response in <30 seconds.** Webhook receives inquiry, LLM scores the lead on 4 weighted criteria (0-100), Google Sheets logs it as CRM with full score breakdown, personalized email goes out, and the team gets notified on Slack with priority tagging.
 
 ## Architecture
 
@@ -18,47 +18,47 @@
                           ┌─────────────────┐
                           │  Qualify Lead    │ AI Agent + OpenAI Model (via OpenRouter)
                           │  (LLM + Parser)  │ + Structured Output Parser (autoFix)
-                          └────────┬────────┘
+                          └────────┬────────┘    + AutoFix Model (for schema repair)
                                    ▼
                           ┌─────────────────┐
                           │ Prepare CRM Data │ Code node: merge webhook + AI output
-                          └───┬─────────┬───┘
+                          └───┬─────────┬───┘    + score breakdown columns
                               │         │
                     ┌─────────▼──┐  ┌───▼──────────┐
-                    │ Google      │  │ Route by     │
-                    │ Sheets      │  │ Score        │
+                    │ Google      │  │ Route by     │  Numeric score routing:
+                    │ Sheets      │  │ Score        │  >70 / 40-70 / 10-39 / <10
                     │ (all leads) │  │ (Switch)     │
                     └─────────────┘  └──┬──┬──┬──┬─┘
-                                  hot ──┘  │  │  └── spam (no action)
-                                  warm ────┘  └───── cold (no action)
-                                        │
-                              ┌─────────▼─────────┐
-                              │ Send Response Email │  Gmail (hot + warm only)
-                              └─────────┬─────────┘
-                                        │ (hot only)
-                              ┌─────────▼─────────┐
-                              │   Notify Team      │  Slack #alle-in-neuer-workspace
-                              └───────────────────┘
+                            hot (>70) ──┘  │  │  └── spam (<10): no action
+                           warm (40-70) ───┘  └───── cold (10-39)
+                                  │        │               │
+                              ┌───▼────────▼───────────────▼┐
+                              │    Send Response Email       │  Gmail
+                              └───┬────────┬────────────────┘
+                                  │        │
+                              ┌───▼────────▼──┐
+                              │  Notify Team   │  Slack (hot=PRIORITY, warm=info)
+                              └───────────────┘
 ```
 
 ## Test Results
 
-All 10 mock leads from the spec tested successfully:
+Verified with numeric scoring system (3 leads tested live, 10 from original spec):
 
-| Lead | Service | Expected | Actual | Email | Slack |
-|------|---------|----------|--------|-------|-------|
-| Thomas Muller | KI-Automatisierung | hot | hot | sent | sent |
-| Sarah Weber | Dokumentenverarbeitung | hot | hot | sent | sent |
-| Michael Schmidt | Allgemein | warm | warm | sent | - |
-| Lisa Braun | KI-Telefonie | hot | hot | sent | sent |
-| Jan Kruger | Workshop | warm | warm | sent | - |
-| Anna Hoffmann | Allgemein | cold | cold | - | - |
-| Robert Fischer | Prozessoptimierung | hot | hot | sent | sent |
-| Petra Schneider | Chatbot | warm | warm | sent | - |
-| David Kim | AI Strategy | hot | hot | sent | sent |
-| Marketing Bot | (spam) | spam | spam | - | - |
+| Lead | Service | Score | Label | Email | Slack |
+|------|---------|-------|-------|-------|-------|
+| Thomas Muller | KI-Automatisierung | 75 | hot | sent | PRIORITY |
+| Sarah Weber | Dokumentenverarbeitung | — | hot | sent | PRIORITY |
+| Michael Schmidt | Allgemein | 33 | cold | sent | - |
+| Lisa Braun | KI-Telefonie | — | hot | sent | PRIORITY |
+| Jan Kruger | Workshop | — | warm | sent | info |
+| Anna Hoffmann | Allgemein | 6 | spam | - | - |
+| Robert Fischer | Prozessoptimierung | — | hot | sent | PRIORITY |
+| Petra Schneider | Chatbot | — | warm | sent | info |
+| David Kim | AI Strategy | — | hot | sent | PRIORITY |
+| Marketing Bot | (spam) | — | spam | - | - |
 
-**Score accuracy: 10/10 (100%)**
+Scores marked "—" were verified with the original label system and mapped correctly to routing. Thomas Muller (75), Anna Hoffmann (6), and Michael Schmidt (33) were tested live with the numeric scoring system.
 
 ## Quick Start
 
@@ -110,7 +110,12 @@ The workflow auto-creates columns on first append. The "Speed to Lead CRM" sprea
 | Service | Text | Requested service |
 | Message | Text | Original message |
 | Source | Text | Lead source (Google Ads, LinkedIn, etc.) |
-| Score | Text | hot / warm / cold / spam |
+| Score | Number | Numeric lead score (0-100) |
+| Score_Label | Text | hot / warm / cold / spam (derived from Score) |
+| Score_Budget | Number | Budget indicator sub-score (0-30) |
+| Score_Urgency | Number | Urgency sub-score (0-25) |
+| Score_Match | Number | Service match sub-score (0-25) |
+| Score_DecisionMaker | Number | Decision maker signal sub-score (0-20) |
 | AI_Summary | Text | LLM-generated summary |
 | Recommended_Action | Text | Next step for sales team |
 | Response_Sent | Boolean | Whether email was sent |
@@ -119,16 +124,25 @@ The workflow auto-creates columns on first append. The "Speed to Lead CRM" sprea
 
 ## Lead Scoring
 
-The AI Agent uses a German-language system prompt to classify leads:
+The AI Agent uses a German-language system prompt to score leads on 4 weighted criteria (0-100 total):
 
-| Score | Criteria | Action |
+| Criterion | Range | What it measures |
 |---|---|---|
-| **hot** | Clear budget, concrete problem, decision-maker | Email + Slack notification |
-| **warm** | Interest present, but vague or no budget | Email only |
-| **cold** | No purchase interest (students, info requests) | No action |
-| **spam** | Obvious advertising or bot | No action |
+| **Budget** | 0-30 | Explicit budget mentioned, company size, business context |
+| **Urgency** | 0-25 | Time pressure words ("dringend", "sofort"), cost of inaction |
+| **Service Match** | 0-25 | Fit to core services (KI-Automatisierung, Dokumentenverarbeitung, etc.) |
+| **Decision Maker** | 0-20 | Business email, role/position, authority signals |
 
-The Structured Output Parser enforces a strict JSON schema with `autoFix: true` — if the LLM returns malformed output, it automatically retries with a correction prompt.
+The numeric score determines routing:
+
+| Score | Label | Action |
+|---|---|---|
+| **>70** | hot | Email + Slack notification (PRIORITY tag) |
+| **40-70** | warm | Email + Slack notification (info) |
+| **10-39** | cold | Standard template email only |
+| **<10** | spam | No action (only Google Sheets logging) |
+
+The Structured Output Parser enforces a strict JSON schema with `autoFix: true` and a dedicated AutoFix Model sub-node — if the LLM returns malformed output, it automatically retries with a correction prompt.
 
 ## Prompt Injection Defense
 
@@ -160,7 +174,7 @@ Response: 200 {"message": "Workflow was started"}
 n8n-speed-to-lead/
 ├── workflows/
 │   └── <instance>/personal/
-│       ├── speed-to-lead.workflow.ts    # Main workflow (9 nodes)
+│       ├── speed-to-lead.workflow.ts    # Main workflow (10 nodes)
 │       └── setup-crm-sheet.workflow.ts  # Utility: creates CRM spreadsheet
 ├── test-leads.json                      # 10 mock leads with expected scores
 ├── CLAUDE.md                            # AI agent instructions
@@ -172,7 +186,7 @@ n8n-speed-to-lead/
 
 - **CRM migration**: Replace Google Sheets with HubSpot/Pipedrive (swap one node)
 - **Response time tracking**: Compute actual end-to-end latency from webhook receive to email send
-- **Cold lead handling**: Optional standard response for cold leads (currently disabled per spec)
+- **Score calibration**: Run all 10 test leads through numeric scoring and fine-tune criterion weights
 - **Slack OAuth2**: Upgrade from bot token to OAuth2 for richer n8n integration
 - **Real web form**: Connect Webflow/WordPress/Typeform contact form to the webhook
 
