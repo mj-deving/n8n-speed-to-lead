@@ -1,64 +1,65 @@
 # Speed to Lead Autopilot
 
-![n8n](https://img.shields.io/badge/n8n-2.11.2-orange.svg)
-![Status](https://img.shields.io/badge/status-live-brightgreen.svg)
-![Test Results](https://img.shields.io/badge/test_leads-10%2F10-brightgreen.svg)
-![Code-First](https://img.shields.io/badge/code--first-n8nac-blue.svg)
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+[![n8n](https://img.shields.io/badge/n8n-2.11.2-orange.svg)](https://n8n.io)
+[![Status](https://img.shields.io/badge/status-live-brightgreen.svg)](https://github.com/mj-deving/n8n-speed-to-lead)
+[![Test Results](https://img.shields.io/badge/test_leads-10%2F10-brightgreen.svg)](#test-results)
+[![Code-First](https://img.shields.io/badge/code--first-n8nac-blue.svg)](https://github.com/mj-deving/n8n-speed-to-lead)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Automated lead qualification and response in <30 seconds.** Webhook (or [HTML contact form](#web-form)) receives inquiry, LLM scores the lead on 4 weighted criteria (0-100), CRM logs it ([Google Sheets](#google-sheets-crm-schema) or [HubSpot](#hubspot-variant-setup)) with full score breakdown, personalized email goes out, and the team gets notified on Slack with priority tagging and end-to-end response time. Average ~8s end-to-end, ~$0.001 per lead (Gemini 2.0 Flash via OpenRouter).
+Automated lead qualification and response in under 30 seconds. A webhook (or the included [HTML contact form](#web-form)) receives an inquiry, an LLM scores it on four weighted criteria (0-100), the CRM logs the full breakdown ([Google Sheets](#google-sheets-crm-schema) or [HubSpot](#hubspot-variant-setup)), a personalized email goes out, and the sales team gets a Slack alert with priority tagging and live response time. Ten calibrated test leads score 100% correctly. Average end-to-end execution is ~8 s at ~$0.001 per lead via Gemini 2.0 Flash on OpenRouter.
 
 ### Table of Contents
 
-- [Architecture](#architecture) — Mermaid workflow diagram
-- [Test Results](#test-results) — all 10 leads with numeric scores
-- [Quick Start](#quick-start) — clone, connect, push, test
-- [Credentials](#credentials) — OpenRouter, Google, Gmail, Slack
-- [Google Sheets CRM Schema](#google-sheets-crm-schema) — column reference
-- [Lead Scoring](#lead-scoring) — 4 weighted criteria, routing rules
-- [Prompt Injection Defense](#prompt-injection-defense)
-- [Webhook API](#webhook-api) — POST payload schema
-- [CRM Variants](#crm-variants) — Google Sheets vs HubSpot
-- [Web Form](#web-form) — standalone HTML contact page
-- [Response Time](#response-time) — end-to-end benchmarks
-- [Tech Stack](#tech-stack) — versions and dependencies
+- [Architecture](#architecture) — Mermaid flowchart of the 10-node workflow
+- [Test Results](#test-results) — all 10 leads with numeric scores and breakdown
+- [Prerequisites](#prerequisites) — what you need before setup
+- [Quick Start](#quick-start) — clone, connect, push, test in five commands
+- [Credentials](#credentials) — OpenRouter, Google Sheets, Gmail, Slack
+- [Google Sheets CRM Schema](#google-sheets-crm-schema) — 17-column reference
+- [Lead Scoring](#lead-scoring) — four weighted criteria and routing rules
+- [Prompt Injection Defense](#prompt-injection-defense) — how the system prompt resists manipulation
+- [Webhook API](#webhook-api) — POST payload schema and response
+- [CRM Variants](#crm-variants) — Google Sheets vs HubSpot side-by-side
+- [Web Form](#web-form) — standalone HTML contact page, zero dependencies
+- [Response Time](#response-time) — end-to-end benchmarks per lead
+- [Tech Stack](#tech-stack) — versions, costs, and dependencies
 
 ## Architecture
 
 ```mermaid
 flowchart TD
     W["POST /webhook/lead"] --> WT["Webhook Trigger"]
-    WT --> QL["Qualify Lead<br/><small>AI Agent + Gemini 2.0 Flash</small>"]
-    QL -.->|ai_languageModel| LLM["OpenAI Model<br/><small>via OpenRouter</small>"]
-    QL -.->|ai_outputParser| SP["Structured Output Parser<br/><small>autoFix: true</small>"]
+    WT --> QL["Qualify Lead\nAI Agent + Gemini 2.0 Flash"]
+    QL -.->|ai_languageModel| LLM["OpenAI Model\nvia OpenRouter"]
+    QL -.->|ai_outputParser| SP["Structured Output Parser\nautoFix: true"]
     SP -.->|ai_languageModel| AFM["AutoFix Model"]
-    QL --> CRM["Prepare CRM Data<br/><small>Code: merge + score breakdown</small>"]
-    CRM --> GS["Google Sheets<br/><small>all leads</small>"]
+    QL --> CRM["Prepare CRM Data\nmerge + score breakdown"]
+    CRM --> GS["Google Sheets\nall leads"]
     CRM --> SW{"Route by Score"}
-    SW -->|">70 hot"| EMAIL["Send Response Email<br/><small>Gmail</small>"]
+    SW -->|">70 hot"| EMAIL["Send Response Email\nGmail"]
     SW -->|"40-70 warm"| EMAIL
     SW -->|"10-39 cold"| EMAIL
-    SW -->|"<10 spam"| STOP(("no action"))
-    SW -->|">70 hot"| SLACK["Notify Team<br/><small>Slack PRIORITY + response time</small>"]
+    SW -->|"< 10 spam"| STOP(("no action"))
+    SW -->|">70 hot"| SLACK["Notify Team\nSlack + response time"]
     SW -->|"40-70 warm"| SLACK
 
-    style W fill:#f5f5f7,stroke:#86868b
-    style WT fill:#0071e3,color:#fff
-    style QL fill:#5856d6,color:#fff
-    style LLM fill:#af52de,color:#fff
-    style SP fill:#af52de,color:#fff
-    style AFM fill:#af52de,color:#fff
-    style CRM fill:#ff9500,color:#fff
-    style GS fill:#34c759,color:#fff
-    style SW fill:#ff3b30,color:#fff
-    style EMAIL fill:#007aff,color:#fff
-    style SLACK fill:#30d158,color:#fff
-    style STOP fill:#8e8e93,color:#fff
+    style W fill:#f0f0f0,color:#333,stroke:none
+    style WT fill:#cce5ff,color:#003d80,stroke:none
+    style QL fill:#e0d4f5,color:#3b1f7a,stroke:none
+    style LLM fill:#edd4f5,color:#5a1f7a,stroke:none
+    style SP fill:#edd4f5,color:#5a1f7a,stroke:none
+    style AFM fill:#edd4f5,color:#5a1f7a,stroke:none
+    style CRM fill:#ffeccc,color:#7a4500,stroke:none
+    style GS fill:#d4edda,color:#155724,stroke:none
+    style SW fill:#fdd,color:#721c24,stroke:none
+    style EMAIL fill:#cce5ff,color:#003d80,stroke:none
+    style SLACK fill:#d4edda,color:#155724,stroke:none
+    style STOP fill:#e8e8e8,color:#555,stroke:none
 ```
 
 ## Test Results
 
-All 10 mock leads tested live with numeric scoring system:
+All 10 mock leads tested live with the numeric scoring system:
 
 | Lead | Service | Score | Label | Budget | Urgency | Match | DM | Email | Slack |
 |------|---------|------:|-------|-------:|--------:|------:|---:|-------|-------|
@@ -73,7 +74,7 @@ All 10 mock leads tested live with numeric scoring system:
 | David Kim | AI Strategy | 78 | hot | 25 | 15 | 20 | 18 | sent | PRIORITY |
 | Marketing Bot | (spam) | 1 | spam | 0 | 0 | 0 | 1 | - | - |
 
-**Score calibration notes:** Michael Schmidt (35) and Petra Schneider (33) were expected "warm" but scored "cold" — their messages are genuinely vague with no budget/urgency signals, making "cold" more accurate than the original label. Anna Hoffmann (5) was expected "cold" but scored "spam" — a student asking for an interview has near-zero commercial value. No prompt adjustments needed; the numeric scoring is more precise than the original 4-label system.
+**Score calibration notes:** Michael Schmidt (35) and Petra Schneider (33) were expected "warm" but scored "cold" — their messages are genuinely vague with no budget or urgency signals, making "cold" more accurate than the original label. Anna Hoffmann (5) was expected "cold" but scored "spam" — a student requesting an interview has near-zero commercial value. No prompt adjustments needed; the numeric scoring is more precise than the original four-label system.
 
 ## Prerequisites
 
@@ -107,14 +108,14 @@ npx --yes n8nac test <workflow-id> --prod --data '{"name":"Test User","email":"t
 
 ## Credentials
 
-| Credential | Type | Status | Purpose |
-|---|---|---|---|
-| OpenRouter | `openAiApi` | Configured | LLM for lead qualification (Gemini 2.0 Flash) |
-| Google Sheets | `googleSheetsOAuth2Api` | Configured | CRM logging (all leads) |
-| Gmail | `gmailOAuth2` | Configured | Personalized email responses |
-| Slack Bot | `slackApi` (accessToken) | Configured | Hot lead team notifications |
+| Credential | Type | Purpose |
+|---|---|---|
+| OpenRouter | `openAiApi` | LLM for lead qualification (Gemini 2.0 Flash) |
+| Google Sheets | `googleSheetsOAuth2Api` | CRM logging (all leads) |
+| Gmail | `gmailOAuth2` | Personalized email responses |
+| Slack Bot | `slackApi` (accessToken) | Team notifications |
 
-To set up from scratch, you need:
+To set up from scratch you need:
 - **OpenRouter/OpenAI API key** for the LLM
 - **Google Cloud OAuth2 client** with Sheets + Gmail scopes
 - **Slack Bot Token** (`xoxb-...`) with `chat:write`, `chat:write.public`, `channels:read` scopes
@@ -146,7 +147,7 @@ The workflow auto-creates columns on first append. The "Speed to Lead CRM" sprea
 
 ## Lead Scoring
 
-The AI Agent uses a German-language system prompt to score leads on 4 weighted criteria (0-100 total):
+The AI Agent uses a German-language system prompt to score leads on four weighted criteria (0-100 total):
 
 | Criterion | Range | What it measures |
 |---|---|---|
@@ -202,7 +203,7 @@ Two workflow variants are available — identical scoring, routing, email, and S
 ### HubSpot Variant Setup
 
 1. **Create a HubSpot App Token** in your [HubSpot Developer Portal](https://developers.hubspot.com/) (Free CRM account works)
-2. **Add credential** in n8n: Settings → Credentials → Add "HubSpot App Token"
+2. **Add credential** in n8n: Settings > Credentials > Add "HubSpot App Token"
 3. **Create custom properties** in HubSpot before first use:
 
    **Contact properties:**
@@ -256,15 +257,15 @@ A standalone HTML contact form is included at `static/contact-form.html`. No ext
 
 ## Response Time
 
-End-to-end response time is tracked in the Slack notification via live `Date.now()` measurement. Measured from data-ready (after LLM processing) to Slack delivery:
+End-to-end response time is tracked in the Slack notification via a live `Date.now()` measurement. Measured from data-ready (after LLM processing) to Slack delivery:
 
 | Lead | Score | Total Execution | Slack (end-to-end) |
 |------|-------|-----------------|--------------------|
-| Sarah Weber | 75 (hot) | 10.1s | 5s |
-| David Kim | 75 (hot) | 7.8s | 3s |
-| Lisa Braun | 78 (hot) | 5.7s | 2s |
+| Sarah Weber | 75 (hot) | 10.1 s | 5 s |
+| David Kim | 75 (hot) | 7.8 s | 3 s |
+| Lisa Braun | 78 (hot) | 5.7 s | 2 s |
 
-**Average total execution: ~8s.** Well within the <30s SLA. LLM processing (Gemini 2.0 Flash via OpenRouter) accounts for ~3s; the rest is email/Slack delivery and Google Sheets logging.
+**Average total execution: ~8 s.** Well within the <30 s SLA. LLM processing (Gemini 2.0 Flash via OpenRouter) accounts for ~3 s; the rest is email/Slack delivery and Google Sheets logging.
 
 `Response_Time_Sec` in Google Sheets is not populated from inside the workflow (n8n's Code node cannot access the execution start timestamp). The accurate timing is in the Slack message.
 
