@@ -6,7 +6,7 @@
 ![Code-First](https://img.shields.io/badge/code--first-n8nac-blue.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-**Automated lead qualification and response in <30 seconds.** Webhook receives inquiry, LLM scores the lead on 4 weighted criteria (0-100), Google Sheets logs it as CRM with full score breakdown, personalized email goes out, and the team gets notified on Slack with priority tagging.
+**Automated lead qualification and response in <30 seconds.** Webhook (or [HTML contact form](#web-form)) receives inquiry, LLM scores the lead on 4 weighted criteria (0-100), CRM logs it ([Google Sheets](#google-sheets-crm-schema) or [HubSpot](#hubspot-variant-setup)) with full score breakdown, personalized email goes out, and the team gets notified on Slack with priority tagging and end-to-end response time.
 
 ## Architecture
 
@@ -38,7 +38,7 @@
                                   │        │
                               ┌───▼────────▼──┐
                               │  Notify Team   │  Slack (hot=PRIORITY, warm=info)
-                              └───────────────┘
+                              └───────────────┘    + "Lead beantwortet in Xs"
 ```
 
 ## Test Results
@@ -119,7 +119,7 @@ The workflow auto-creates columns on first append. The "Speed to Lead CRM" sprea
 | AI_Summary | Text | LLM-generated summary |
 | Recommended_Action | Text | Next step for sales team |
 | Response_Sent | Boolean | Whether email was sent |
-| Response_Time_Sec | Number | Seconds from receive to processing |
+| Response_Time_Sec | Number | Not populated (see [Response Time](#response-time) — tracked in Slack) |
 | Status | Text | Neu / In Bearbeitung / Konvertiert / Verloren |
 
 ## Lead Scoring
