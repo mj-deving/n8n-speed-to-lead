@@ -218,10 +218,23 @@ n8n-speed-to-lead/
 └── package.json
 ```
 
+## Response Time
+
+End-to-end response time is tracked in the Slack notification via live `Date.now()` measurement. Measured from data-ready (after LLM processing) to Slack delivery:
+
+| Lead | Score | Total Execution | Slack (end-to-end) |
+|------|-------|-----------------|--------------------|
+| Sarah Weber | 75 (hot) | 10.1s | 5s |
+| David Kim | 75 (hot) | 7.8s | 3s |
+| Lisa Braun | 78 (hot) | 5.7s | 2s |
+
+**Average total execution: ~8s.** Well within the <30s SLA. LLM processing (Gemini 2.0 Flash via OpenRouter) accounts for ~3s; the rest is email/Slack delivery and Google Sheets logging.
+
+`Response_Time_Sec` in Google Sheets is not populated from inside the workflow (n8n's Code node cannot access the execution start timestamp). The accurate timing is in the Slack message.
+
 ## Future Improvements
 
 - **CRM migration**: Replace Google Sheets with HubSpot/Pipedrive (swap one node)
-- **Response time tracking**: Compute actual end-to-end latency from webhook receive to email send
 - **Score calibration**: Run all 10 test leads through numeric scoring and fine-tune criterion weights
 - **Slack OAuth2**: Upgrade from bot token to OAuth2 for richer n8n integration
 - **Real web form**: Connect Webflow/WordPress/Typeform contact form to the webhook

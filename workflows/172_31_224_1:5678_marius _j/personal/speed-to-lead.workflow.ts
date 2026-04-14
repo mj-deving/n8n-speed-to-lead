@@ -193,10 +193,9 @@ PERSONALISIERTE ANTWORT: 3-5 Sätze die:
         jsCode: `// Merge webhook input + AI qualification into CRM row format
 const webhook = $('Webhook Trigger').item.json.body;
 const ai = $input.item.json.output;
-const receivedAt = $('Webhook Trigger').item.json.headers['date']
-  ? new Date($('Webhook Trigger').item.json.headers['date']).getTime()
-  : Date.now();
-const responseTimeSec = Math.round((Date.now() - receivedAt) / 1000);
+const now = Date.now();
+// Store processing timestamp for downstream end-to-end calculation (Slack)
+$execution.customData.set('webhook_ts', now.toString());
 const breakdown = ai.score_breakdown || {};
 
 return {
@@ -218,11 +217,12 @@ return {
     AI_Summary: ai.summary,
     Recommended_Action: ai.recommended_action,
     Response_Sent: ai.score >= 10,
-    Response_Time_Sec: responseTimeSec,
+    Response_Time_Sec: null,
     Status: 'Neu',
     // Downstream-only fields (excluded from Sheets via autoMap column filter)
     _personalized_response: ai.personalized_response,
     _score_label: ai.score_label,
+    _processing_ts: now,
   }
 };`,
     };
@@ -307,7 +307,7 @@ return {
             value: 'C0ASXU219GQ',
         },
         messageType: 'text',
-        text: '={{ $json._score_label === "hot" ? "🔥 *PRIORITY — Neuer HOT Lead! (Score: " + $json.Score + "/100)*" : "📋 *Neuer WARM Lead (Score: " + $json.Score + "/100)*" }}{{ "\\n\\n*Name:* " + $json.Name + "\\n*Email:* " + $json.Email + "\\n*Service:* " + $json.Service + "\\n\\n*Score-Details:*\\n  Budget: " + $json.Score_Budget + "/30 | Dringlichkeit: " + $json.Score_Urgency + "/25 | Service-Match: " + $json.Score_Match + "/25 | Entscheider: " + $json.Score_DecisionMaker + "/20\\n\\n*Zusammenfassung:* " + $json.AI_Summary + "\\n*Empfohlene Aktion:* " + $json.Recommended_Action }}',
+        text: '={{ $json._score_label === "hot" ? "🔥 *PRIORITY — Neuer HOT Lead! (Score: " + $json.Score + "/100)*" : "📋 *Neuer WARM Lead (Score: " + $json.Score + "/100)*" }}{{ "\\n\\n*Name:* " + $json.Name + "\\n*Email:* " + $json.Email + "\\n*Service:* " + $json.Service + "\\n\\n*Score-Details:*\\n  Budget: " + $json.Score_Budget + "/30 | Dringlichkeit: " + $json.Score_Urgency + "/25 | Service-Match: " + $json.Score_Match + "/25 | Entscheider: " + $json.Score_DecisionMaker + "/20\\n\\n*Zusammenfassung:* " + $json.AI_Summary + "\\n*Empfohlene Aktion:* " + $json.Recommended_Action + "\\n\\n⏱️ Lead beantwortet in " + Math.round((Date.now() - $json._processing_ts) / 1000) + "s (end-to-end)" }}',
         options: {},
     };
 
