@@ -10,35 +10,35 @@
 
 ## Architecture
 
-```
-                          ┌─────────────────┐
-  POST /webhook/lead  ──▶ │ Webhook Trigger  │
-                          └────────┬────────┘
-                                   ▼
-                          ┌─────────────────┐
-                          │  Qualify Lead    │ AI Agent + OpenAI Model (via OpenRouter)
-                          │  (LLM + Parser)  │ + Structured Output Parser (autoFix)
-                          └────────┬────────┘    + AutoFix Model (for schema repair)
-                                   ▼
-                          ┌─────────────────┐
-                          │ Prepare CRM Data │ Code node: merge webhook + AI output
-                          └───┬─────────┬───┘    + score breakdown columns
-                              │         │
-                    ┌─────────▼──┐  ┌───▼──────────┐
-                    │ Google      │  │ Route by     │  Numeric score routing:
-                    │ Sheets      │  │ Score        │  >70 / 40-70 / 10-39 / <10
-                    │ (all leads) │  │ (Switch)     │
-                    └─────────────┘  └──┬──┬──┬──┬─┘
-                            hot (>70) ──┘  │  │  └── spam (<10): no action
-                           warm (40-70) ───┘  └───── cold (10-39)
-                                  │        │               │
-                              ┌───▼────────▼───────────────▼┐
-                              │    Send Response Email       │  Gmail
-                              └───┬────────┬────────────────┘
-                                  │        │
-                              ┌───▼────────▼──┐
-                              │  Notify Team   │  Slack (hot=PRIORITY, warm=info)
-                              └───────────────┘    + "Lead beantwortet in Xs"
+```mermaid
+flowchart TD
+    W["POST /webhook/lead"] --> WT["Webhook Trigger"]
+    WT --> QL["Qualify Lead<br/><small>AI Agent + Gemini 2.0 Flash</small>"]
+    QL -.->|ai_languageModel| LLM["OpenAI Model<br/><small>via OpenRouter</small>"]
+    QL -.->|ai_outputParser| SP["Structured Output Parser<br/><small>autoFix: true</small>"]
+    SP -.->|ai_languageModel| AFM["AutoFix Model"]
+    QL --> CRM["Prepare CRM Data<br/><small>Code: merge + score breakdown</small>"]
+    CRM --> GS["Google Sheets<br/><small>all leads</small>"]
+    CRM --> SW{"Route by Score"}
+    SW -->|">70 hot"| EMAIL["Send Response Email<br/><small>Gmail</small>"]
+    SW -->|"40-70 warm"| EMAIL
+    SW -->|"10-39 cold"| EMAIL
+    SW -->|"<10 spam"| STOP(("no action"))
+    SW -->|">70 hot"| SLACK["Notify Team<br/><small>Slack PRIORITY + response time</small>"]
+    SW -->|"40-70 warm"| SLACK
+
+    style W fill:#f5f5f7,stroke:#86868b
+    style WT fill:#0071e3,color:#fff
+    style QL fill:#5856d6,color:#fff
+    style LLM fill:#af52de,color:#fff
+    style SP fill:#af52de,color:#fff
+    style AFM fill:#af52de,color:#fff
+    style CRM fill:#ff9500,color:#fff
+    style GS fill:#34c759,color:#fff
+    style SW fill:#ff3b30,color:#fff
+    style EMAIL fill:#007aff,color:#fff
+    style SLACK fill:#30d158,color:#fff
+    style STOP fill:#8e8e93,color:#fff
 ```
 
 ## Test Results
