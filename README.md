@@ -168,17 +168,53 @@ Content-Type: application/json
 Response: 200 {"message": "Workflow was started"}
 ```
 
+## CRM Variants
+
+Two workflow variants are available — identical scoring, routing, email, and Slack logic, but different CRM backends:
+
+| Variant | File | Webhook Path | CRM | Nodes |
+|---|---|---|---|---|
+| **Google Sheets** (default) | `speed-to-lead.workflow.ts` | `/webhook/lead` | Google Sheets append | 10 |
+| **HubSpot** | `speed-to-lead-hubspot.workflow.ts` | `/webhook/lead-hubspot` | HubSpot Contact + Deal | 11 |
+
+### HubSpot Variant Setup
+
+1. **Create a HubSpot App Token** in your [HubSpot Developer Portal](https://developers.hubspot.com/) (Free CRM account works)
+2. **Add credential** in n8n: Settings → Credentials → Add "HubSpot App Token"
+3. **Create custom properties** in HubSpot before first use:
+
+   **Contact properties:**
+   | Property | Internal name | Type |
+   |---|---|---|
+   | Lead Score | `lead_score` | Number |
+   | Score Label | `lead_score_label` | Single-line text |
+   | Lead Source | `lead_source` | Single-line text |
+   | AI Summary | `ai_summary` | Multi-line text |
+
+   **Deal properties:**
+   | Property | Internal name | Type |
+   |---|---|---|
+   | Score Budget | `score_budget` | Number |
+   | Score Urgency | `score_urgency` | Number |
+   | Score Match | `score_match` | Number |
+   | Score Decision Maker | `score_decision_maker` | Number |
+   | Recommended Action | `recommended_action` | Single-line text |
+
+4. **Set the deal stage** in the "Create HubSpot Deal" node to match your pipeline (default: `appointmentscheduled`)
+5. **Update credential IDs** in the workflow file for both HubSpot nodes
+
 ## Project Structure
 
 ```
 n8n-speed-to-lead/
 ├── workflows/
 │   └── <instance>/personal/
-│       ├── speed-to-lead.workflow.ts    # Main workflow (10 nodes)
-│       └── setup-crm-sheet.workflow.ts  # Utility: creates CRM spreadsheet
-├── test-leads.json                      # 10 mock leads with expected scores
-├── CLAUDE.md                            # AI agent instructions
-├── AGENTS.md                            # n8nac protocol (auto-generated)
+│       ├── speed-to-lead.workflow.ts         # Main workflow — Google Sheets CRM (10 nodes)
+│       ├── speed-to-lead-hubspot.workflow.ts # HubSpot CRM variant (11 nodes)
+│       └── setup-crm-sheet.workflow.ts       # Utility: creates CRM spreadsheet
+├── test-leads.json                           # 10 mock leads with expected scores
+├── CLAUDE.md                                 # AI agent instructions
+├── AGENTS.md                                 # n8nac protocol (auto-generated)
 └── package.json
 ```
 

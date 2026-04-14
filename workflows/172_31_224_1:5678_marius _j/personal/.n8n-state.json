@@ -9,6 +9,11 @@
       "lastSyncedHash": "713bf5cee7424bc5feb0d6ab57f6422eb9bab050f65b756f646a016a49f9f20b",
       "lastSyncedAt": "2026-04-10T15:51:03.030Z",
       "filename": "setup-crm-sheet.workflow.ts"
+    },
+    "VxpMaHOSb9WVxjEB": {
+      "lastSyncedHash": "e8e035282e349ac4a7441cef043fc45bfe9672c5699dd2c5382f1aa4aa035e48",
+      "lastSyncedAt": "2026-04-14T06:37:47.020Z",
+      "filename": "speed-to-lead-hubspot.workflow.ts"
     }
   }
 }
