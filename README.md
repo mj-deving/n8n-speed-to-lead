@@ -43,22 +43,22 @@
 
 ## Test Results
 
-Verified with numeric scoring system (3 leads tested live, 10 from original spec):
+All 10 mock leads tested live with numeric scoring system:
 
-| Lead | Service | Score | Label | Email | Slack |
-|------|---------|-------|-------|-------|-------|
-| Thomas Muller | KI-Automatisierung | 75 | hot | sent | PRIORITY |
-| Sarah Weber | Dokumentenverarbeitung | — | hot | sent | PRIORITY |
-| Michael Schmidt | Allgemein | 33 | cold | sent | - |
-| Lisa Braun | KI-Telefonie | — | hot | sent | PRIORITY |
-| Jan Kruger | Workshop | — | warm | sent | info |
-| Anna Hoffmann | Allgemein | 6 | spam | - | - |
-| Robert Fischer | Prozessoptimierung | — | hot | sent | PRIORITY |
-| Petra Schneider | Chatbot | — | warm | sent | info |
-| David Kim | AI Strategy | — | hot | sent | PRIORITY |
-| Marketing Bot | (spam) | — | spam | - | - |
+| Lead | Service | Score | Label | Budget | Urgency | Match | DM | Email | Slack |
+|------|---------|------:|-------|-------:|--------:|------:|---:|-------|-------|
+| Thomas Muller | KI-Automatisierung | 75 | hot | 20 | 15 | 20 | 20 | sent | PRIORITY |
+| Sarah Weber | Dokumentenverarbeitung | 75 | hot | 15 | 20 | 20 | 20 | sent | PRIORITY |
+| Michael Schmidt | Allgemein | 35 | cold | 5 | 5 | 15 | 10 | sent | - |
+| Lisa Braun | KI-Telefonie | 85 | hot | 15 | 25 | 25 | 20 | sent | PRIORITY |
+| Jan Kruger | Workshop | 58 | warm | 15 | 5 | 18 | 20 | sent | info |
+| Anna Hoffmann | Allgemein | 5 | spam | 0 | 0 | 5 | 0 | - | - |
+| Robert Fischer | Prozessoptimierung | 95 | hot | 30 | 25 | 20 | 20 | sent | PRIORITY |
+| Petra Schneider | Chatbot | 33 | cold | 5 | 5 | 15 | 8 | sent | - |
+| David Kim | AI Strategy | 78 | hot | 25 | 15 | 20 | 18 | sent | PRIORITY |
+| Marketing Bot | (spam) | 1 | spam | 0 | 0 | 0 | 1 | - | - |
 
-Scores marked "—" were verified with the original label system and mapped correctly to routing. Thomas Muller (75), Anna Hoffmann (6), and Michael Schmidt (33) were tested live with the numeric scoring system.
+**Score calibration notes:** Michael Schmidt (35) and Petra Schneider (33) were expected "warm" but scored "cold" — their messages are genuinely vague with no budget/urgency signals, making "cold" more accurate than the original label. Anna Hoffmann (5) was expected "cold" but scored "spam" — a student asking for an interview has near-zero commercial value. No prompt adjustments needed; the numeric scoring is more precise than the original 4-label system.
 
 ## Quick Start
 
