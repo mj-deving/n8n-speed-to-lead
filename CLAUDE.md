@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Project Is
 
-**Speed to Lead Autopilot** — automated lead qualification and response in <30 seconds. A single n8n workflow receives webhook inquiries, qualifies leads via LLM (hot/warm/cold/spam), logs to Google Sheets CRM, sends personalized email responses (hot+warm), and notifies the team on Slack (hot only). German-language system prompt with prompt injection defense.
+**Speed to Lead Autopilot** — automated lead qualification and response in <30 seconds. A single n8n workflow receives webhook inquiries, scores leads via LLM on 4 weighted criteria (0-100), logs to CRM (Google Sheets or HubSpot), sends personalized email responses, and notifies the team on Slack with priority tagging and response time. German-language system prompt with prompt injection defense.
 
 ## Before Any Work
 
@@ -49,12 +49,13 @@ bd sync               # End session — persist state for next agent
 
 ## Architecture
 
-Workflow files live in `workflows/<instance>/personal/` (path derived from `workflowDir` in `n8nac-config.json`). Two workflows exist:
+Workflow files live in `workflows/<instance>/personal/` (path derived from `workflowDir` in `n8nac-config.json`). Three workflows exist:
 
-- **speed-to-lead.workflow.ts** — main 9-node workflow: Webhook → AI Agent (LLM qualifier + Structured Output Parser) → Prepare CRM Data (Code node) → Google Sheets (log all) + Switch (route by score) → Gmail (hot/warm) → Slack (hot only)
+- **speed-to-lead.workflow.ts** — main 10-node workflow (Google Sheets CRM): Webhook → AI Agent (LLM scorer + Structured Output Parser + AutoFix Model) → Prepare CRM Data → Google Sheets (all leads) + Switch (score-based routing) → Gmail (hot/warm/cold) → Slack (hot/warm with response time)
+- **speed-to-lead-hubspot.workflow.ts** — HubSpot CRM variant (11 nodes): same scoring/routing, replaces Google Sheets with HubSpot Contact (all leads) + Deal (hot/warm only)
 - **setup-crm-sheet.workflow.ts** — utility to create the CRM spreadsheet
 
-Lead scoring: hot (budget + concrete problem + decision-maker), warm (interest but vague), cold (no purchase interest), spam (bots/ads). The Structured Output Parser enforces JSON schema with `autoFix: true`.
+Lead scoring uses 4 weighted criteria (0-100 total): Budget (0-30), Urgency (0-25), Service-Match (0-25), Decision-Maker (0-20). Score thresholds: >70=hot, 40-70=warm, 10-39=cold, <10=spam. The Structured Output Parser enforces JSON schema with `autoFix: true` via a dedicated AutoFix Model sub-node.
 
 ## Critical Rules
 
@@ -63,5 +64,7 @@ Lead scoring: hot (budget + concrete problem + decision-maker), warm (interest b
 - **Init required**: Must run `npx --yes n8nac init` before any n8nac workflow commands
 - **Always activate then test with `--prod`** — bare `test <id>` requires manual arming in n8n editor
 - **Error classification**: Class A (credentials/config) → tell user, don't edit code. Class B (wiring) → fix and re-push
+- **autoFix needs its own LLM**: `outputParserStructured` with `autoFix: true` requires a dedicated `ai_languageModel` sub-node connected via `.uses()` — it won't use the parent Agent's model
+- **n8n Code node limitations**: `$execution.startedAt` is NOT available in Code nodes. Use `Date.now()` and `$execution.customData.set()` for timing. Response time tracking uses live `Date.now()` in Slack expressions
 - **Session end**: Always run `bd sync` then `git push` — Landing the Plane protocol
 - **Never leave unpushed work** — work isn't done until `git push` succeeds
