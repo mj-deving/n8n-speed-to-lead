@@ -6,7 +6,22 @@
 ![Code-First](https://img.shields.io/badge/code--first-n8nac-blue.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-**Automated lead qualification and response in <30 seconds.** Webhook (or [HTML contact form](#web-form)) receives inquiry, LLM scores the lead on 4 weighted criteria (0-100), CRM logs it ([Google Sheets](#google-sheets-crm-schema) or [HubSpot](#hubspot-variant-setup)) with full score breakdown, personalized email goes out, and the team gets notified on Slack with priority tagging and end-to-end response time.
+**Automated lead qualification and response in <30 seconds.** Webhook (or [HTML contact form](#web-form)) receives inquiry, LLM scores the lead on 4 weighted criteria (0-100), CRM logs it ([Google Sheets](#google-sheets-crm-schema) or [HubSpot](#hubspot-variant-setup)) with full score breakdown, personalized email goes out, and the team gets notified on Slack with priority tagging and end-to-end response time. Average ~8s end-to-end, ~$0.001 per lead (Gemini 2.0 Flash via OpenRouter).
+
+### Table of Contents
+
+- [Architecture](#architecture) — Mermaid workflow diagram
+- [Test Results](#test-results) — all 10 leads with numeric scores
+- [Quick Start](#quick-start) — clone, connect, push, test
+- [Credentials](#credentials) — OpenRouter, Google, Gmail, Slack
+- [Google Sheets CRM Schema](#google-sheets-crm-schema) — column reference
+- [Lead Scoring](#lead-scoring) — 4 weighted criteria, routing rules
+- [Prompt Injection Defense](#prompt-injection-defense)
+- [Webhook API](#webhook-api) — POST payload schema
+- [CRM Variants](#crm-variants) — Google Sheets vs HubSpot
+- [Web Form](#web-form) — standalone HTML contact page
+- [Response Time](#response-time) — end-to-end benchmarks
+- [Tech Stack](#tech-stack) — versions and dependencies
 
 ## Architecture
 
@@ -59,6 +74,13 @@ All 10 mock leads tested live with numeric scoring system:
 | Marketing Bot | (spam) | 1 | spam | 0 | 0 | 0 | 1 | - | - |
 
 **Score calibration notes:** Michael Schmidt (35) and Petra Schneider (33) were expected "warm" but scored "cold" — their messages are genuinely vague with no budget/urgency signals, making "cold" more accurate than the original label. Anna Hoffmann (5) was expected "cold" but scored "spam" — a student asking for an interview has near-zero commercial value. No prompt adjustments needed; the numeric scoring is more precise than the original 4-label system.
+
+## Prerequisites
+
+- **n8n** instance running (v2.11.2+ recommended) — self-hosted or cloud
+- **Node.js** 18+ and npm
+- **API credentials** — see [Credentials](#credentials) for the full list
+- Optional: HubSpot Free CRM account for the [HubSpot variant](#hubspot-variant-setup)
 
 ## Quick Start
 
@@ -246,9 +268,17 @@ End-to-end response time is tracked in the Slack notification via live `Date.now
 
 `Response_Time_Sec` in Google Sheets is not populated from inside the workflow (n8n's Code node cannot access the execution start timestamp). The accurate timing is in the Slack message.
 
-## Future Improvements
+## Tech Stack
 
-- **Slack OAuth2**: Upgrade from bot token to OAuth2 for richer n8n integration
+| Component | Version | Purpose |
+|-----------|---------|---------|
+| n8n | 2.11.2 | Workflow automation platform |
+| n8n-as-code (n8nac) | 1.6.1 | Code-first workflow development CLI |
+| Gemini 2.0 Flash | via OpenRouter | LLM for lead scoring (~$0.001/lead) |
+| Google Sheets API | v4 | CRM logging (default variant) |
+| HubSpot API | v3 | CRM logging (optional variant) |
+| Gmail API | v1 | Personalized email responses |
+| Slack API | Web API | Team notifications with priority tagging |
 
 ## License
 
