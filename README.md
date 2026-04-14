@@ -212,11 +212,25 @@ n8n-speed-to-lead/
 │       ├── speed-to-lead.workflow.ts         # Main workflow — Google Sheets CRM (10 nodes)
 │       ├── speed-to-lead-hubspot.workflow.ts # HubSpot CRM variant (11 nodes)
 │       └── setup-crm-sheet.workflow.ts       # Utility: creates CRM spreadsheet
+├── static/
+│   └── contact-form.html                     # Standalone contact form for the webhook
 ├── test-leads.json                           # 10 mock leads with expected scores
 ├── CLAUDE.md                                 # AI agent instructions
 ├── AGENTS.md                                 # n8nac protocol (auto-generated)
 └── package.json
 ```
+
+## Web Form
+
+A standalone HTML contact form is included at `static/contact-form.html`. No external dependencies — pure HTML/CSS/JS.
+
+**Setup:**
+1. Set the `WEBHOOK_URL` constant in the `<script>` tag to your n8n webhook URL (e.g. `http://your-n8n:5678/webhook/lead`)
+2. Serve the file via any static hosting (GitHub Pages, nginx, or open locally)
+
+**Fields:** Name (required), Email (required), Phone (optional), Service (dropdown with all core services), Message (required), Source (hidden: "Website")
+
+**Features:** Responsive design, field validation, loading state, success confirmation. The form POSTs JSON directly to the webhook — no backend needed.
 
 ## Response Time
 
@@ -234,10 +248,7 @@ End-to-end response time is tracked in the Slack notification via live `Date.now
 
 ## Future Improvements
 
-- **CRM migration**: Replace Google Sheets with HubSpot/Pipedrive (swap one node)
-- **Score calibration**: Run all 10 test leads through numeric scoring and fine-tune criterion weights
 - **Slack OAuth2**: Upgrade from bot token to OAuth2 for richer n8n integration
-- **Real web form**: Connect Webflow/WordPress/Typeform contact form to the webhook
 
 ## License
 

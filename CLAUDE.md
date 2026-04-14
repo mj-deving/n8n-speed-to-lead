@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Project Is
 
-**Speed to Lead Autopilot** — automated lead qualification and response in <30 seconds. A single n8n workflow receives webhook inquiries, scores leads via LLM on 4 weighted criteria (0-100), logs to CRM (Google Sheets or HubSpot), sends personalized email responses, and notifies the team on Slack with priority tagging and response time. German-language system prompt with prompt injection defense.
+**Speed to Lead Autopilot** — automated lead qualification and response in <30 seconds. A single n8n workflow receives webhook inquiries (from API or the included HTML contact form), scores leads via LLM on 4 weighted criteria (0-100), logs to CRM (Google Sheets or HubSpot), sends personalized email responses, and notifies the team on Slack with priority tagging and response time. German-language system prompt with prompt injection defense.
 
 ## Before Any Work
 
@@ -54,6 +54,8 @@ Workflow files live in `workflows/<instance>/personal/` (path derived from `work
 - **speed-to-lead.workflow.ts** — main 10-node workflow (Google Sheets CRM): Webhook → AI Agent (LLM scorer + Structured Output Parser + AutoFix Model) → Prepare CRM Data → Google Sheets (all leads) + Switch (score-based routing) → Gmail (hot/warm/cold) → Slack (hot/warm with response time)
 - **speed-to-lead-hubspot.workflow.ts** — HubSpot CRM variant (11 nodes): same scoring/routing, replaces Google Sheets with HubSpot Contact (all leads) + Deal (hot/warm only)
 - **setup-crm-sheet.workflow.ts** — utility to create the CRM spreadsheet
+
+Additional files: `static/contact-form.html` (standalone HTML form that POSTs to the webhook), `test-leads.json` (10 calibrated mock leads with expected scores and verified numeric results).
 
 Lead scoring uses 4 weighted criteria (0-100 total): Budget (0-30), Urgency (0-25), Service-Match (0-25), Decision-Maker (0-20). Score thresholds: >70=hot, 40-70=warm, 10-39=cold, <10=spam. The Structured Output Parser enforces JSON schema with `autoFix: true` via a dedicated AutoFix Model sub-node.
 
