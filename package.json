@@ -1,5 +1,5 @@
 {
-  "name": "my-n8n-project",
+  "name": "n8n-speed-to-lead",
   "version": "1.0.0",
   "private": true,
   "description": "Code-first n8n workflows with n8nac",
