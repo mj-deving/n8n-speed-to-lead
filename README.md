@@ -1,10 +1,6 @@
 # Speed to Lead Autopilot
 
-[![n8n](https://img.shields.io/badge/n8n-2.11.2-orange.svg)](https://n8n.io)
-[![Status](https://img.shields.io/badge/status-live-brightgreen.svg)](https://github.com/mj-deving/n8n-speed-to-lead)
-[![Test Results](https://img.shields.io/badge/test_leads-10%2F10-brightgreen.svg)](#test-results)
-[![Code-First](https://img.shields.io/badge/code--first-n8nac-blue.svg)](https://github.com/mj-deving/n8n-speed-to-lead)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![n8n](https://img.shields.io/badge/-n8n-EA4B71?style=flat-square) ![TypeScript](https://img.shields.io/badge/-TypeScript-3178C6?style=flat-square) ![Claude](https://img.shields.io/badge/-Claude-D4A574?style=flat-square) ![Slack](https://img.shields.io/badge/-Slack-4A154B?style=flat-square)
 
 Automated lead qualification and response in under 30 seconds. A webhook (or the included [HTML contact form](#web-form)) receives an inquiry, an LLM scores it on four weighted criteria (0-100), the CRM logs the full breakdown ([Google Sheets](#google-sheets-crm-schema) or [HubSpot](#hubspot-variant-setup)), a personalized email goes out, and the sales team gets a Slack alert with priority tagging and live response time. Ten calibrated test leads score 100% correctly. Average end-to-end execution is ~8 s at ~$0.001 per lead via Gemini 2.0 Flash on OpenRouter.
 
