@@ -19,6 +19,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Beads** (`bd`) — AI-native issue tracker and agent memory
 - **Credentials**: OpenRouter (LLM via Gemini 2.0 Flash), Google Sheets OAuth2, Gmail OAuth2, Slack Bot Token
 
+## Beads Conventions
+
+- Beads is the task authority for this repo.
+- Start with `bd dolt pull || true` and `bd ready --json`.
+- Create self-contained beads at creation time with `bd create --description "what and why" --context "files, commands, current state" --notes "SOURCES: <url or internal source>. kn entry: <filename or none>"`.
+- For investigations or regressions, make beads evidence-first: repro, observed evidence, likely fix surface when justified, and acceptance that can falsify the current theory.
+- Decompose obvious epics into child beads immediately and wire order with `bd dep`.
+- Close beads with explicit reasons such as `completed`, `superseded`, `already implemented`, or `invalidated by better evidence`.
+- End sessions with `bd dolt push`, not the older `bd sync` flow.
+
 ## Key Commands
 
 ```bash
@@ -43,8 +53,9 @@ npm run check-secrets                                  # Scan for leaked secrets
 npm run check-secrets:staged                           # Scan staged files only
 
 # Beads (issue tracking)
-bd ready              # Start session — find available work
-bd sync               # End session — persist state for next agent
+bd dolt pull || true  # Refresh shared Beads state
+bd ready --json       # Start session — find available work
+bd dolt push          # End session — persist state for next agent
 ```
 
 ## Architecture
@@ -61,6 +72,7 @@ Lead scoring uses 4 weighted criteria (0-100 total): Budget (0-30), Urgency (0-2
 
 ## Critical Rules
 
+- Read `AGENTS.md` after this file for the repo workflow contract.
 - **Push requires full path**: `npx --yes n8nac push workflows/.../file.workflow.ts` — bare filenames are rejected
 - **Always pull before editing** existing workflows — OCC will reject stale pushes
 - **Init required**: Must run `npx --yes n8nac init` before any n8nac workflow commands
@@ -68,5 +80,5 @@ Lead scoring uses 4 weighted criteria (0-100 total): Budget (0-30), Urgency (0-2
 - **Error classification**: Class A (credentials/config) → tell user, don't edit code. Class B (wiring) → fix and re-push
 - **autoFix needs its own LLM**: `outputParserStructured` with `autoFix: true` requires a dedicated `ai_languageModel` sub-node connected via `.uses()` — it won't use the parent Agent's model
 - **n8n Code node limitations**: `$execution.startedAt` is NOT available in Code nodes. Use `Date.now()` and `$execution.customData.set()` for timing. Response time tracking uses live `Date.now()` in Slack expressions
-- **Session end**: Always run `bd sync` then `git push` — Landing the Plane protocol
+- **Session end**: Always run `bd dolt push` then `git push` — Landing the Plane protocol
 - **Never leave unpushed work** — work isn't done until `git push` succeeds
